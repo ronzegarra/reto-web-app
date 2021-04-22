@@ -1,45 +1,9 @@
-import React, { FC, useEffect } from "react";
+import React, { FC, useEffect, useState } from "react";
 
-import {
-  BrowserRouter as Router,
-  Switch,
-  Route,
-  Link,
-  useHistory,
-  BrowserRouter,
-} from "react-router-dom";
+import { BrowserRouter as Router, useHistory } from "react-router-dom";
 
-//import styles from "./step1.scss";
+import Chart from "react-apexcharts";
 
-//import './App.scss';
-
-import Step2 from "../Step2/Step2";
-import Step3 from "../Step3/Step3";
-
-import backgroundImage from "../../img/images/Base.png";
-
-import logo from "../../img/images/Logo_RIMAC.png";
-
-import dad from "../../img/images/Dad.png";
-import kid from "../../img/images/Kid.png";
-import mom from "../../img/images/Mom.png";
-import frame from "../../img/images/Frame.png";
-import plant from "../../img/images/Plant.png";
-import shadow from "../../img/images/Shadow.png";
-import shadow2 from "../../img/images/Shadow2.png";
-
-import buy from "../../img/icons/ic_shield.png";
-import quotes from "../../img/icons/llamada-de-telefono-inteligente.png";
-
-import coverage from "../../img/icons/ic_money.png";
-
-import clinics from "../../img/icons/ic_clinic.png";
-
-import calendar from "../../img/icons/Vector2.png";
-
-//import styles2 from 'uno.module.scss';
-
-//import './copy-sccs.scss'
 import "./step1.scss";
 
 interface TitleProps {
@@ -47,19 +11,77 @@ interface TitleProps {
 }
 
 const Step1: FC<TitleProps> = ({ title }) => {
+  const [list, setList] = useState([]);
+  const [values, setValues] = useState([]);
+
+  const [average, setAverage] = useState("");
+  const [desviation, setDesviation] = useState("");
+
+  const [options, setOptions] = useState({
+    chart: {
+      id: "apexchart-example",
+    },
+    xaxis: {
+      categories: [],
+    },
+  });
+
+  const [series, setSeries] = useState([
+    {
+      name: "series-1",
+      data: [],
+    },
+  ]);
+
   useEffect(() => {
-    const getDataFromApi = async () => {
+    const getClientsFromApi = async () => {
       try {
-        let response = await fetch("https://randomuser.me/api");
+        let response = await fetch(
+          "https://reto-api-rest-server.herokuapp.com/clients"
+        );
         let json = await response.json();
-        console.warn("json RESPONSE", json);
-        return json;
+        console.log("json RESPONSE", json);
+        setList(json);
+        let extraOut: any = [];
+        let extraSeries: any = [];
+        json.map((item: any) => extraOut.push(item.name));
+        json.map((item: any) => extraSeries.push(item.age));
+        setOptions({
+          chart: {
+            id: "apexchart-example",
+          },
+          xaxis: {
+            categories: extraOut,
+          },
+        });
+
+        setSeries([
+          {
+            name: "series-1",
+            data: extraSeries,
+          },
+        ]);
       } catch (error) {
         console.error(error);
       }
     };
 
-    getDataFromApi();
+    const getValuesFromApi = async () => {
+      try {
+        let response = await fetch(
+          "https://reto-api-rest-server.herokuapp.com/kpideclientes"
+        );
+        let json = await response.json();
+        console.log("json RESPONSE++", json);
+        setAverage(json[0].avg_age);
+        setDesviation(json[0].std_age);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    getClientsFromApi();
+    getValuesFromApi();
   }, []);
 
   let history = useHistory();
@@ -68,179 +90,58 @@ const Step1: FC<TitleProps> = ({ title }) => {
     <main>
       <div className="container">
         <div className="row row-container">
-          <img src={frame} alt="Cuadro" className="image-frame" />
+          <div className="col-sm-6 options">
+            <div className="formulary-radio-container-step2">
+              <label className="table-title">
+                Listado de nuestros Clientes
+              </label>
 
-          <img src={plant} alt="Planta" className="image-plant" />
-
-          <img src={dad} alt="Padre" className="image-left" />
-
-          <img src={kid} alt="Hijo" className="image-center" />
-
-          <img src={mom} alt="Madre" className="image-right" />
-
-          <img src={shadow} alt="Shadow" className="image-shadow" />
-
-          <img src={shadow2} alt="Shadow" className="image-shadow2" />
-
-          <div className="col-sm-8 col-md-8 options">
-            <div className="logo-container">
-              <img src={logo} alt="Logo" />
-            </div>
-
-            <label className="title">Seguro de Salud</label>
-            <div className="list-container">
-              <ul>
-                <li>
-                  {" "}
-                  <img className="list-image" src={buy} alt="things"></img>{" "}
-                  <label>Cómpralo de manera fácil y rápida </label>
-                </li>
-                <li>
-                  {" "}
-                  <img className="list-image" src={buy} alt="things"></img>{" "}
-                  <label>Cotiza y compra tu seguro 100% digital</label>{" "}
-                </li>
-                <li>
-                  {" "}
-                  <img
-                    className="list-image"
-                    src={coverage}
-                    alt="things"
-                  ></img>{" "}
-                  <label>Hasta S/.12 millones de cobertura anual</label>
-                </li>
-                <li>
-                  <img className="list-image" src={clinics} alt="things"></img>
-                  <label>Más de 300 clínicas en todo el Perú</label>
-                </li>
-              </ul>
-            </div>
-            <div className="lis-first-option">
-              <ul>
-                <li>
-                  {" "}
-                  <img className="list-image" src={buy} alt="things"></img>{" "}
-                  <label>Cómpralo de manera fácil y rápida </label>
-                </li>
-              </ul>
-              <label className="list-counter">{"<  01 / 04  >"}</label>
-            </div>
-
-            <footer className="footer-container">
-              <small className="footer-label">
-                &copy; 2021 RIMAC Seguros y Reseguros
-              </small>
-            </footer>
-          </div>
-          <div className="col-sm-4 ">
-            <div className="formulary-container">
-              <div className="col formulary-header">
-                <label className="formulary-title">
-                  Obtén tu{" "}
-                  <label className="formulary-title-part">seguro ahora</label>
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Nombre</th>
+                    <th scope="col">Apellido</th>
+                    <th scope="col">Edad</th>
+                    <th scope="col">Fecha de Nacimiento</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {list.map((item: any) => (
+                    <tr>
+                      <th scope="row">#</th>
+                      <td>{item.name}</td>
+                      <td>{item.last_name}</td>
+                      <td>{item.age}</td>
+                      <td>{item.date_birth}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div>
+                <label className="average-label ">
+                  Promedio Edad Clientes:{" "}
+                  <label className="average">{average} años</label>
                 </label>
                 <br />
-                <label className="formulary-subtitle">
-                  Ingresa los datos para comenzar
+                <label className="desviation-label">
+                  Desviación Estandar Edad Clientes:{" "}
+                  <label className="desviation">{desviation}</label>
                 </label>
               </div>
+            </div>
+          </div>
 
-              <div className="input-group mb-3 formulary-input-large">
-                <button
-                  className="btn btn-outline-secondary dropdown-toggle"
-                  type="button"
-                  data-bs-toggle="dropdown"
-                  aria-expanded="false"
-                >
-                  DNI
-                </button>
-                <ul className="dropdown-menu">
-                  <li>
-                    <a className="dropdown-item" href="#">
-                      Action
-                    </a>
-                  </li>
-                  <li>
-                    <a className="dropdown-item" href="#">
-                      Another action
-                    </a>
-                  </li>
-                  <li>
-                    <a className="dropdown-item" href="#">
-                      Something else here
-                    </a>
-                  </li>
-                  <li>
-                    <hr className="dropdown-divider" />
-                  </li>
-                  <li>
-                    <a className="dropdown-item" href="#">
-                      Separated link
-                    </a>
-                  </li>
-                </ul>
-                <input
-                  type="text"
-                  className="form-control"
-                  aria-label="Text input with dropdown button"
-                />
-              </div>
-
-              <div className="form-floating">
-                <input
-                  className="form-control"
-                  id="floatingPassword"
-                  placeholder="Fecha de nacimiento"
-                />
-                <label>Fecha de nacimiento</label>
-                <span className="input-group-addon formulary-calendar">
-                  <img className="list-image" src={calendar} alt="things"></img>{" "}
-                </span>
-              </div>
-
-              <div className="form-floating mb-3">
-                <input
-                  type="email"
-                  className="form-control"
-                  id="floatingInput"
-                  placeholder="987654321"
-                />
-                <label>Celular</label>
-              </div>
-
-              <div className="formulary-check-container">
-                <div className="form-check">
-                  <input
-                    className="form-check-input"
-                    type="checkbox"
-                    value=""
-                    id="flexCheckDefault"
-                  />
-                  <label className="form-check-label">
-                    Acepto la Política de Protección de Datos Personales y los
-                    Términos y Condiciones.
-                  </label>
-                </div>
-                <div className="form-check ">
-                  <input
-                    className="form-check-input"
-                    type="checkbox"
-                    value=""
-                    id="flexCheckChecked"
-                  />
-                  <label className="form-check-label">
-                    Acepto la Política de Envío de Comunicaciones Comerciales.
-                  </label>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                className="btn btn-primary btn-lg formulary-bottom"
-                onClick={() => history.push("/step2")}
-              >
-                COMENCEMOS
-              </button>
+          <div className="col-sm-6 ">
+            <div className="chart-container">
+              <label className="chart-title">Grafica Nombre - Edad</label>
+              <Chart
+                options={options}
+                series={series}
+                type="bar"
+                width={500}
+                height={320}
+              />
             </div>
           </div>
         </div>
